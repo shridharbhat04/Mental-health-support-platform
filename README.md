@@ -1,6 +1,5 @@
 # Mental-health-support-platform
 
-# Mental Health Support Platform
 
 ## Overview
 The **Mental Health Support Platform** is a database management system designed to assist mental health professionals in managing virtual therapy sessions. It helps organize patient information, track progress, and support continuous care. The system is built for local deployment but can be scaled to cloud platforms like AWS or Google Cloud.
