@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Appointments</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #f8f9fa;
+            padding: 20px;
+        }
+
+        .main-content {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        h1 {
+            background: #0056b3;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .search-bar {
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .search-bar input {
+            width: 50%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #0056b3;
+            color: white;
+        }
+
+        tr:hover {
+            background: #e9ecef;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .back-link a:hover {
+            background: #0056b3;
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 450px;
+            margin: auto;
+            position: relative;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Slightly stronger shadow */
+            font-size: 20px; /* Slightly larger font for better readability */
+        }
+
+        .modal-content h2 {
+            color: #dc3545;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            margin: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- Main Content -->
+<div class="main-content">
+    <h1>Manage Appointments</h1>
+    
+    <div class="search-bar">
+        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search for appointments...">
+    </div>
+    
+    <table id="appointmentTable">
+        <thead>
+            <tr>
+                <th>Appointment ID</th>
+                <th>Patient Name</th>
+                <th>Patient Email</th>
+                <th>Therapist Name</th>
+                <th>Specialization</th>
+                <th>Date & Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+            <tr id="row-{{ appointment.AppointmentID }}">
+                <td>{{ appointment.AppointmentID }}</td>
+                <td>{{ appointment.patient_name }}</td>
+                <td>{{ appointment.patient_contact }}</td>
+                <td>{{ appointment.therapist_name }}</td>
+                <td>{{ appointment.Specialization }}</td>
+                <td>{{ appointment.date }} {{ appointment.time }}</td>
+                <td>{{ appointment.status }}</td>
+                <td>
+                    <button class="btn btn-delete" onclick="deleteAppointment({{ appointment.AppointmentID }})">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="back-link">
+        <a href="{{ url_for('admin_dashboard') }}">Back to Admin Panel</a>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <h2>Confirm Delete</h2><br>
+        <p>Are you sure you want to delete this appointment?</p><br>
+        <button id="confirmDelete" class="btn btn-delete">Yes, delete it!</button>
+        <button id="cancelDelete" class="btn">Cancel</button>
+    </div>
+</div>
+
+<!-- Success Confirmation Modal -->
+<div id="successModal" class="modal">
+    <div class="modal-content">
+        <h2>Success</h2><br>
+        <p>Appointment deleted successfully.</p><br>
+        <button id="closeSuccess" class="btn">OK</button>
+    </div>
+</div>
+
+<script>
+    let appointmentToDelete = null;
+
+    function deleteAppointment(appointmentId) {
+        appointmentToDelete = appointmentId;
+        document.getElementById("deleteModal").style.display = "flex";
+    }
+
+    document.getElementById("confirmDelete").addEventListener("click", function () {
+        if (appointmentToDelete) {
+            fetch(`/admin/delete_appointment/${appointmentToDelete}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById("successModal").style.display = "flex";
+                    let row = document.getElementById(`row-${appointmentToDelete}`);
+                    if (row) row.remove();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error deleting appointment. Please try again.');
+            });
+        }
+        document.getElementById("deleteModal").style.display = "none";
+    });
+
+    document.getElementById("cancelDelete").addEventListener("click", function () {
+        document.getElementById("deleteModal").style.display = "none";
+    });
+
+    document.getElementById("closeSuccess").addEventListener("click", function () {
+        document.getElementById("successModal").style.display = "none";
+        location.reload();
+    });
+
+    function searchTable() {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        let table = document.getElementById("appointmentTable");
+        let rows = table.getElementsByTagName("tr");
+        
+        for (let i = 1; i < rows.length; i++) {
+            let rowText = rows[i].innerText.toLowerCase();
+            rows[i].style.display = rowText.includes(input) ? "" : "none";
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Appointments</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: #333;
+        }
+
+        h1, h2 {
+            background-color: #6a0572;
+            color: white;
+            padding: 20px;
+            margin: 0;
+            text-align: center;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #6a0572;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .no-appointments {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .back-home {
+            display: block;
+            width: 200px;
+            text-align: center;
+            background-color: #6a0572;
+            color: white;
+            padding: 10px;
+            margin: 30px auto;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .back-home:hover {
+            background-color: #a71d8e;
+        }
+
+        .btn-cancel {
+            color: white;
+            background-color: #f44336;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .btn-cancel:hover {
+            background-color: #e53935;
+        }
+
+        .btn-confirm {
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .btn-confirm:hover {
+            background-color: #45a049;
+        }
+
+        ul {
+            list-style: none;
+            padding: 10px;
+            margin: 20px auto;
+            width: 80%;
+            color: #6a0572;
+            background-color: #f2f2f2;
+            border-radius: 8px;
+        }
+
+        .feedback-message {
+            padding: 8px;
+            margin: 5px 0;
+            border-left: 4px solid #6a0572;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                width: 95%;
+            }
+
+            th, td {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h2>Manage Appointments</h2>
+
+<!-- Displaying flash messages for feedback -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul>
+            {% for category, message in messages %}
+                <li class="feedback-message">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+<!-- Appointments Table -->
+{% if appointments %}
+    <table>
+        <thead>
+            <tr>
+                <th>Appointment ID</th>
+                <th>Patient Name</th>
+                <th>Patient Age</th>
+                <th>Appointment Date</th>
+                <th>Time</th>
+                <th>Therapy Goal</th>
+                <th>Diagnosis</th>
+                <th>Payment Details</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+    <tr>
+        <td>{{ appointment.AppointmentID }}</td>
+        <td>{{ appointment.PatientName }}</td>
+        <td>{{ appointment.Age }}</td>
+        <td>{{ appointment.Date }}</td>
+        <td>{{ appointment.Time }}</td>
+        <td>{{ appointment.TherapyGoals or 'N/A' }}</td> 
+        <td>{{ appointment.Diagnosis or 'N/A' }}</td> 
+        <td>{{ appointment.PaymentMethod }} - Rs{{ appointment.Amount }}</td>
+        <td>{{ appointment.Status }}</td>
+        <td>
+            {% if appointment.Status != 'Confirmed' and appointment.Status != 'Cancelled' %}
+                <!-- Confirm Form -->
+                <form action="{{ url_for('confirm_appointment', appointment_id=appointment.AppointmentID) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-confirm">Confirm</button>
+                </form>
+            {% endif %}
+            {% if appointment.Status == 'Confirmed' %}
+                <!-- Cancel Form -->
+                <form action="{{ url_for('cancel_appointment_therapist', appointment_id=appointment.AppointmentID) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-cancel">Cancel</button>
+                </form>
+            {% endif %}
+        </td>
+    </tr>
+{% endfor %}
+
+        </tbody>
+    </table>
+{% else %}
+    <p class="no-appointments">You don't have any appointments yet.</p>
+{% endif %}
+
+<!-- Back to Home link -->
+<a href="{{ url_for('home') }}" class="back-home">Back to Home</a>
+
+</body>
+</html>

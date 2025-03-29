@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add User</title>
+</head>
+<body>
+    <h1>Add User</h1>
+    <form method="POST" action="/add_user">
+        <label>Name:</label>
+        <input type="text" name="name" required>
+        <label>Email:</label>
+        <input type="email" name="email" required>
+        <label>Role:</label>
+        <select name="role">
+            <option value="Patient">Patient</option>
+            <option value="Therapist">Therapist</option>
+        </select>
+        <button type="submit">Add User</button>
+    </form>
+</body>
+</html>

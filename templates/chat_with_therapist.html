@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Therapist</title>
+    <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+    <style>
+        /* General Styles */
+        body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1c2b3a, #283e51);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+h1 {
+    font-size: 2.2em;
+    text-transform: uppercase;
+    color: #74c0fc;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+#chat-box {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 400px;
+    height: 450px;
+    overflow-y: auto;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.message {
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 10px;
+    word-wrap: break-word;
+    max-width: 75%;
+    animation: fadeIn 0.3s ease-in-out;
+    display: inline-block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.therapist-message {
+    background: #4a90e2;
+    color: white;
+    text-align: left;
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+.patient-message {
+    background: #f76c6c;
+    color: white;
+    text-align: right;
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+#message-input {
+    width: 250px;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    outline: none;
+    background: #fff;
+    color: #333;
+    margin-right: 10px;
+    font-size: 1em;
+}
+
+#send-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    background: #74c0fc;
+    color: #fff;
+    font-size: 1em;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+#send-btn:hover {
+    background: #57a0d3;
+}
+
+.back-link {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    color: #ff6b6b;
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 2px solid #ff6b6b;
+    border-radius: 8px;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.back-link:hover {
+    color: #fff;
+    background-color: #ff6b6b;
+}
+
+
+        /* Chat Box Styling */
+        #chat-box {
+            border: 2px solid #6a0572; /* Elegant dark purple border */
+            background-color: #f7a9d6; /* Soft light pink background */
+            padding: 10px;
+            width: 350px;
+            height: 400px;
+            overflow-y: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px;
+        }
+
+        #chat-box div {
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            background-color: #f6d365; /* Light background for messages */
+            word-wrap: break-word;
+            color: #6a0572; /* Dark purple text inside messages */
+        }
+
+        #chat-box div:nth-child(odd) {
+            background-color: #fda085; /* Slightly darker background for alternating messages */
+        }
+
+        /* Input and Button Styling */
+        #message-input {
+            width: 250px;
+            padding: 10px;
+            border: 2px solid #6a0572;
+            border-radius: 20px;
+            outline: none;
+            background: #ffffff;
+            color: #333;
+            margin-right: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #message-input::placeholder {
+            color: #888;
+        }
+
+        #send-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background: #6a0572;
+            color: white;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #send-btn:hover {
+            background: #7209b7;
+            transform: scale(1.05);
+        }
+
+        #send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Scrollbar Styling */
+        #chat-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #chat-box::-webkit-scrollbar-thumb {
+            background: #6a0572;
+            border-radius: 4px;
+        }
+
+        #chat-box::-webkit-scrollbar-thumb:hover {
+            background: #7209b7;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat with Therapist</h1>
+    <div id="chat-box"></div>
+    <div>
+        <input id="message-input" type="text" placeholder="Type your message here">
+        <button id="send-btn">Send</button>
+    </div>
+
+    <script>
+        const socket = io();
+
+        // Prompt user for room ID (therapist ID)
+        const room = prompt("Enter your therapist's room ID:");
+        if (!room) {
+            alert('Room ID is required!');
+            throw new Error('Room ID is required.');
+        }
+
+        // Join the room
+        socket.emit('join', { room: room });
+
+        // Display messages in the chat box
+        socket.on('message', (data) => {
+            const chatBox = document.getElementById('chat-box');
+            const messageElement = document.createElement('div');
+            messageElement.textContent = `${data.sender || 'System'}: ${data.message}`;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the latest message
+        });
+
+        // Handle sending messages
+        document.getElementById('send-btn').addEventListener('click', () => {
+            const message = document.getElementById('message-input').value;
+            if (!message) return;
+
+            socket.emit('send_message', { room: room, message: message });
+            document.getElementById('message-input').value = '';
+        });
+
+        // Notify server when user leaves
+        window.addEventListener('beforeunload', () => {
+            socket.emit('leave', { room: room });
+        });
+    </script>
+    <div class="back-link-container">
+        <a class="back-link" href="{{ url_for('home') }}">Back to Home</a>
+    </div>
+</body>
+</html>

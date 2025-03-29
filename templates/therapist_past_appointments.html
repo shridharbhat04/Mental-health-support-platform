@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Past Appointments</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: #333;
+            text-align: center;
+        }
+
+        h1 {
+            background-color: #6a0572;
+            color: white;
+            padding: 20px;
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            color: #6a0572;
+            font-size: 1.8rem;
+            margin: 20px 0;
+        }
+
+        /* Navigation */
+        nav {
+            margin: 20px 0;
+        }
+
+        nav a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background-color: #6a0572;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        nav a:hover {
+            background-color: #a71d8e;
+            transform: scale(1.05);
+        }
+
+        /* Table */
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #6a0572;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Filter Input */
+        .filter-container {
+            margin: 20px 0;
+        }
+
+        .filter-container input {
+            width: 60%;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        /* Status Colors */
+        .confirmed {
+            color: orange;
+        }
+
+        .completed {
+            color: green;
+            font-weight: bold;
+        }
+
+        .cancelled {
+            color: red;
+            font-weight: bold;
+        }
+
+        /* Empty State */
+        .no-appointments {
+            font-size: 1.2rem;
+            color: #6a0572;
+            margin-top: 20px;
+        }
+    </style>
+
+    <script>
+        function filterAppointments() {
+            const filter = document.getElementById('filterInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#appointmentsTable tbody tr');
+
+            rows.forEach(row => {
+                const rowText = row.innerText.toLowerCase();
+                row.style.display = rowText.includes(filter) ? '' : 'none';
+            });
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Past Appointments</h1>
+        <nav>
+            <a href="{{ url_for('home') }}">Therapist Dashboard</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="filter-container">
+            <input 
+                type="text" 
+                id="filterInput" 
+                placeholder="Search appointments (e.g., Name, Date, Diagnosis)" 
+                onkeyup="filterAppointments()">
+        </div>
+
+        {% if appointments %}
+        <table id="appointmentsTable">
+            <thead>
+                <tr>
+                    <th>Appointment ID</th>
+                    <th>Patient Name</th>
+                    <th>Patient ID</th>
+                    <th>Age</th>
+                    <th>Therapy Goal</th>
+                    <th>Diagnosis</th>
+                    <th>Date & Time</th>
+                    <th>Payment Details</th>             
+                    <th>Status</th>
+                    <th>Feedback</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr class="{% if appointment.Status == 'Completed' %}row-completed{% elif appointment.Status == 'Cancelled' %}row-cancelled{% endif %}">
+                    <td>{{ appointment.AppointmentID }}</td>
+                    <td>{{ appointment.Name }}</td>
+                    <td>{{ appointment.PatientID }}</td>
+                    <td>{{ appointment.Age }}</td>
+                    <td>{{ appointment.TherapyGoals }}</td>
+                    <td>{{ appointment.Diagnosis }}</td>
+                    <td>{{ appointment.Date }} {{ appointment.Time }}</td>
+                    <td>
+                        {% if appointment.PaymentMethod and appointment.Amount %}
+                            {{ appointment.PaymentMethod }} - Rs{{ appointment.Amount }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if appointment.Status == 'Confirmed' %}
+                            <span class="confirmed">Confirmed</span>
+                        {% elif appointment.Status == 'Completed' %}
+                            <span class="completed">Completed</span>
+                        {% elif appointment.Status == 'Cancelled' %}
+                            <span class="cancelled">Cancelled</span>
+                        {% else %}
+                            {{ appointment.Status }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if appointment.Comments %}
+                            {{ appointment.Comments }}
+                        {% else %}
+                            No feedback provided
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="no-appointments">No past appointments found.</p>
+        {% endif %}
+    </main>
+</body>
+</html>

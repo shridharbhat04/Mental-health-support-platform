@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View & Modify Notes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: #333;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            background-color: #6a0572;
+            color: white;
+            padding: 20px;
+            margin: 0;
+            text-align: center;
+        }
+
+        form {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        label {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #6a0572;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button:hover {
+            background-color: #a71d8e;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            background-color: #6a0572;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .back-link a:hover {
+            background-color: #a71d8e;
+        }
+
+        .flash-messages {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #f8d7da;
+            color: #721c24;
+            text-align: center;
+        }
+
+        .table-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center; /* Align horizontally */
+            vertical-align: middle; /* Align vertically */
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+
+        td.actions {
+            text-align: center;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            min-width: 80px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .edit-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #e53935;
+            transform: scale(1.05);
+        }
+
+        .actions form {
+            margin: 0;
+            padding: 0;
+            background: none;
+            box-shadow: none;
+            width: auto;
+        }
+
+        .no-notes-container {
+            background-color: #fff;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 50%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .no-notes-message {
+            font-size: 18px;
+            color: #6a0572;
+        }
+
+        @media screen and (max-width: 768px) {
+            form, .table-container, .no-notes-container {
+                width: 90%;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <h1>View & Modify Notes</h1>
+
+    <!-- View Notes Section -->
+    <form method="POST" onsubmit="return validateForm()">
+        <div>
+            <label for="patient_id">Enter Patient ID:</label><br>
+            <input type="number" id="patient_id" name="patient_id" required min="1" pattern="\d*">
+        </div>
+        <br>
+        <button type="submit">View Notes</button>
+    </form>
+
+    <div class="back-link">
+        <a href="{{ url_for('home') }}">Back to Dashboard</a>
+    </div>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="flash-messages">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% if patient_id %}
+    {% if notes %}
+    <div class="table-container">
+        <h3>Notes for Patient #{{ patient_id }}</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Appointment Date</th>
+                    <th>Appointment Time</th>
+                    <th>Note</th>
+                    <th>Date Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for note in notes %}
+                <tr id="note-{{ note.NoteID }}">
+                    <td>{{ note.Date }}</td>
+                    <td>{{ note.Time }}</td>
+                    <td>{{ note.NoteText }}</td>
+                    <td>{{ note.DateCreated }}</td>
+                    <td class="actions">
+                        <form action="{{ url_for('edit_note', note_id=note.NoteID) }}" method="GET" style="display:inline;">
+                            <button type="submit" class="action-btn edit-btn">Edit</button>
+                        </form>
+                        <button class="action-btn delete-btn" onclick="deleteNote('{{ note.NoteID }}')">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="no-notes-container">
+        <p class="no-notes-message">No notes found for this patient.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <script>
+        // Validate patient ID input
+        function validateForm() {
+            const patientId = document.getElementById('patient_id').value;
+            if (isNaN(patientId) || patientId <= 0) {
+                alert('Please enter a valid patient ID');
+                return false;
+            }
+            return true;
+        }
+
+        // Function to delete a note using AJAX
+        function deleteNote(noteId) {
+            const confirmation = confirm("Are you sure you want to delete this note?");
+            if (confirmation) {
+                $.ajax({
+                    url: '/delete_note/' + noteId,
+                    method: 'POST',
+                    success: function(response) {
+                        if (response.status === "success") {
+                            alert(response.message);
+                            $('#note-' + noteId).remove();  // Remove the note from the table
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert("An error occurred while deleting the note.");
+                    }
+                });
+            }
+        }
+    </script>
+    
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</body>
+
+</html>

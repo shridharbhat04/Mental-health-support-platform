@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #f6d365, #fda085);
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chatbot-container {
+            background-color: rgba(231, 147, 147, 0.833);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 580px; /* Increased by 10px */
+            height: 660px; /* Increased by 10px */
+            text-align: center;
+        }
+
+        h1 {
+            color: #6a1b9a; /* Purple color */
+        }
+
+        .back-link-container {
+            margin-top: -10px; /* Move the box up */
+            padding: 10px;
+            border: 2px solid #f6d365;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.6);
+            display: inline-block;
+            transition: background-color 0.3s ease; /* Smooth transition for background */
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: #333333; /* Dark color for the text */
+            font-size: 18px;
+        }
+
+        .back-link:hover {
+            color: #fda085;
+        }
+
+        .back-link-container:hover {
+            background-color: #333333; /* Dark background on hover */
+        }
+
+        .back-link-container:hover .back-link {
+            color: #ffffff; /* White color for the text on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <h1>Chat with Mental Health Chatbot</h1>
+        <iframe width="480" height="540" allow="microphone;" src="https://console.dialogflow.com/api-client/demo/embedded/e8b9f4d8-24c2-4bf0-bae1-014a5a41130f"></iframe>
+        <br><br><br><br>
+        <div class="back-link-container">
+            <a class="back-link" href="{{ url_for('home') }}">Back to Home</a>
+        </div>
+        <br><br><br>
+    </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify Therapists</title>
+</head>
+<body>
+    <h1>Verify Therapists</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for therapist in therapists %}
+            <tr>
+                <td>{{ therapist.TherapistID }}</td>
+                <td>{{ therapist.Name }}</td>
+                <td>{{ therapist.Email }}</td>
+                <td>
+                    <button onclick="verifyTherapist(therapist.TherapistID)">Verify</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        function verifyTherapist(therapistId) {
+            fetch(`/admin/verify_therapist/${therapistId}`, { method: 'POST' })
+            .then(() => location.reload());
+        }
+    </script>
+</body>
+</html>

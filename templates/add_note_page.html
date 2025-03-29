@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Note</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: #333;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            background-color: #6a0572;
+            color: white;
+            padding: 20px;
+            margin: 0;
+            text-align: center;
+        }
+
+        form {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        label {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #6a0572;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button:hover {
+            background-color: #a71d8e;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            background-color: #6a0572;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .back-link a:hover {
+            background-color: #a71d8e;
+        }
+
+        ul {
+            list-style: none;
+            padding: 10px;
+            margin: 20px auto;
+            width: 80%;
+            color: #6a0572;
+            background-color: #f2f2f2;
+            border-radius: 8px;
+        }
+
+        .feedback-message {
+            padding: 8px;
+            margin: 5px 0;
+            border-left: 4px solid #6a0572;
+        }
+    </style>
+</head>
+<body>
+    <h1>Add Note</h1>
+    <form method="POST" action="{{ url_for('add_note_page') }}">
+        <div>
+            <label for="appointment_id">Appointment ID:</label><br>
+            <input type="text" id="appointment_id" name="appointment_id" required>
+        </div>
+        <br>
+        <div>
+            <label for="note_text">Enter Note:</label><br>
+            <textarea id="note_text" name="note_text" rows="5" cols="50" required></textarea>
+        </div>
+        <br>
+        <button type="submit">Save Note</button>
+    </form>
+
+    <br>
+    <div class="back-link">
+        <a href="/">Back to Home</a>
+    </div>
+
+    <!-- Display any flash messages -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li class="feedback-message">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</body>
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Patient Portal</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #444;
+            background: linear-gradient(to right, #f6d365, #fda085); /* Soothing gradient */
+            text-align: center;
+        }
+        
+        h1 {
+            background-color: #6a0572;
+            color: white;
+            padding: 40px;
+            font-size: 2.8rem;
+            margin: 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            margin: 40px auto;
+            max-width: 1100px;
+            padding: 20px;
+        }
+
+        .image-section {
+            margin: 20px auto;
+            max-width: 650px;
+        }
+
+        .image-section img {
+            width: 80%;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-caption {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            color: #6a0572;
+        }
+
+        /* Buttons styling */
+        a {
+            display: inline-block;
+            margin: 15px;
+            padding: 12px 25px;
+            background: linear-gradient(to right, #f72585, #7209b7);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        a:hover {
+            background: linear-gradient(to right, #7209b7, #480ca8);
+            transform: scale(1.1);
+        }
+
+        /* Flash messages */
+        .flash-messages {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 5px;
+            font-size: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .flash-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .flash-message.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        /* Chatbot Section */
+        .chatbot-container {
+            background-color: rgba(231, 147, 147, 0.833);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin: 30px auto;
+            width: 80%;
+        }
+
+        .chatbot-container h2 {
+            margin-bottom: 10px;
+            color: #6a0572;
+        }
+
+        #chat-window {
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+        }
+
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #faf7f7;
+            margin-bottom: 10px;
+        }
+
+        #chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        #chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        #chat-input button {
+            padding: 10px;
+            background-color: #6a0572;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        #chat-input button:hover {
+            background-color: #a71d8e;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome to the Mental Health Support Platform</h1>
+
+    <div class="container">
+        {% if 'role' not in session %}
+            <div class="image-section">
+                <img src="{{ url_for('static', filename='mental-health.jpg') }}" alt="Mental Health Image" />
+                <p class="image-caption">Your mental well-being is our priority.</p>
+            </div>
+            <div>
+                <a href="{{ url_for('register') }}">Register</a>
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('reset_password_page') }}">Reset Password</a>
+                <a href="{{ url_for('admin_login') }}">Admin Login</a>
+                <a href="{{ url_for('chatbot') }}">Chat with Mental Health Chatbot</a>
+            </div>
+
+        {% else %}
+            {% if session['role'] == 'Patient' %}
+                <div class="flash-messages">
+                        <h3>Welcome {{ session['user_name'] }}! Let's take care of your well-being</h3>
+                </div>
+                <div>
+                    <h2>Manage Your Mental Health</h2>
+                    <a href="{{ url_for('upcoming_appointments') }}">Upcoming Appointments</a>
+                    <a href="{{ url_for('book_appointment') }}">Book Appointments</a>
+                    <a href="{{ url_for('appointment_history') }}">Past Appointments</a>
+                    <a href="{{ url_for('chat_with_therapist') }}">Chat with Therapist</a>
+                    <a href="{{ url_for('view_resources') }}">View Resources</a>
+                    <a href="http://localhost:8501">Predict Mental Health Status</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </div>
+
+                <div class="chatbot-container">
+                    <h2>Chat with Your Mental Health Assistant</h2>
+                    <div id="chat-window">
+                        <div id="chat-messages"></div>
+                        <div id="chat-input">
+                            <input type="text" id="user-input" placeholder="Type your message..." />
+                            <button onclick="sendMessage()">Send</button>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    async function sendMessage() {
+                        const userInput = document.getElementById("user-input").value;
+                        if (!userInput) return;
+
+                        const chatMessages = document.getElementById("chat-messages");
+                        chatMessages.innerHTML += `<div><strong>You:</strong> ${userInput}</div>`;
+
+                        const response = await fetch("/chat", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ message: userInput })
+                        });
+
+                        const data = await response.json();
+                        chatMessages.innerHTML += `<div><strong>Bot:</strong> ${data.response.replace(/\n/g, "<br>")}</div>`;
+                        document.getElementById("user-input").value = "";
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                </script>
+            {% elif session['role'] == 'Therapist' %}
+                <div class="flash-messages">
+                    <div class="flash-message info">
+                        <h3>Welcome, Therapist {{ session['user_name'] }}! Ready to help.</h3>
+                    </div>
+                </div>
+                <div>
+                    <h2>Manage Therapy</h2>
+                    <a href="{{ url_for('manage_appointments') }}">Manage Appointments</a>
+                    <a href="{{ url_for('view_all_appointments') }}">Upcoming Appointments</a>
+                    <a href="{{ url_for('therapist_past_appointments') }}">Past Appointments</a>
+                    <a href="{{ url_for('add_note_page') }}">Add Notes</a>
+                    <a href="{{ url_for('view_notes') }}">View Notes</a>
+                    <a href="{{ url_for('chat_with_patient') }}">Chat with Patient</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointment History</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #ff9a9e, #fad0c4);
+      color: #333;
+    }
+    h1 {
+      background-color: #6a0572;
+      color: white;
+      padding: 20px;
+      margin: 0;
+      text-align: center;
+    }
+    table {
+      width: 80%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #6a0572;
+      color: white;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    .no-appointments {
+      text-align: center;
+      font-size: 18px;
+      margin-top: 20px;
+      color: #6a0572;
+    }
+    .no-appointments .icon {
+      font-size: 4rem;
+      margin-bottom: 10px;
+    }
+    .back-home, .btn {
+      display: block;
+      width: 200px;
+      text-align: center;
+      background-color: #6a0572;
+      color: white;
+      padding: 10px;
+      margin: 30px auto;
+      border-radius: 5px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+    .back-home:hover, .btn:hover {
+      background-color: #a71d8e;
+    }
+    .btn-feedback {
+      color: white;
+      background-color: #4CAF50;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-top: 5px;
+    }
+    .btn-feedback:hover {
+      background-color: #45a049;
+    }
+    /* New style for the delete button */
+    .btn-delete {
+      color: white;
+      background-color: #e74c3c;  /* red color */
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-top: 5px;
+    }
+    .btn-delete:hover {
+      background-color: #c0392b;  /* darker red on hover */
+    }
+    .btn-feedback:disabled {
+      background-color: #9e9e9e;
+      cursor: not-allowed;
+    }
+    .feedback-message {
+      text-align: center;
+      font-size: 18px;
+      margin-top: 20px;
+      color: #4CAF50;
+    }
+    .feedback-container {
+      display: inline-block;
+      width: 100%;
+    }
+    .feedback-text {
+      margin: 0;
+    }
+    .edit-feedback-form {
+      margin-top: 5px;
+    }
+    textarea {
+      width: 90%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #6a0572;
+      font-size: 0.9rem;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+<h1>Appointment History</h1>
+
+<div class="container">
+    <!-- Filter Form -->
+    <div class="filter-container" style="text-align: center; margin: 20px;">
+        <label for="filter">Filter by:</label>
+        <select id="filter" onchange="filterAppointments()">
+            <option value="all">All Appointments</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+        </select>
+        <label for="search">Search by Appointment ID, Therapist Name, Appointment Date, or Therapist ID:</label>
+        <input type="text" id="search" onkeyup="searchAppointments()" placeholder="Search...">
+    </div>
+
+    {% if appointments %}
+        <table id="appointments-table">
+            <thead>
+                <tr>
+                    <th>Appointment ID</th>
+                    <th>Appointment Date</th>
+                    <th>Therapist ID</th>
+                    <th>Therapist Name</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Payment Record</th>
+                    <th>Feedback</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr class="appointment-row" 
+                    data-status="{{ appointment.Status | lower }}" 
+                    data-appointment-id="{{ appointment.AppointmentID }}" 
+                    data-appointment-date="{{ appointment.Date | lower }}" 
+                    data-therapist-id="{{ appointment.TherapistID }}" 
+                    data-therapist-name="{{ appointment.TherapistName | lower }}">
+                    <td>{{ appointment.AppointmentID }}</td>
+                    <td>{{ appointment.Date }}</td>
+                    <td>{{ appointment.TherapistID }}</td>
+                    <td>{{ appointment.TherapistName }}</td>
+                    <td>{{ appointment.Time }}</td>
+                    <td>{{ appointment.Status }}</td>
+                    <td>{{ appointment.PaymentMethod }} - Rs.{{ appointment.Amount }}</td>
+                    <td>
+                        {% if appointment.Comments %}
+                          <div class="feedback-container" id="feedback-{{ appointment.AppointmentID }}">
+                            <p class="feedback-text">{{ appointment.Comments }}</p>
+                            <button class="btn-feedback" onclick="showEditFeedback('{{ appointment.AppointmentID }}')">Edit Feedback</button>
+                            <button class="btn-delete" onclick="deleteFeedback('{{ appointment.AppointmentID }}')">Delete Feedback</button>
+                            <div class="edit-feedback-form" id="edit-form-{{ appointment.AppointmentID }}" style="display: none;">
+                                <textarea id="feedback-input-{{ appointment.AppointmentID }}" rows="3">{{ appointment.Comments }}</textarea>
+                                <button type="button" class="btn-feedback" onclick="updateFeedback('{{ appointment.AppointmentID }}')">Save</button>
+                                <p id="feedback-msg-{{ appointment.AppointmentID }}" style="display: none; font-weight: bold;"></p>
+                            </div>
+                          </div>
+                        {% else %}
+                          {% if appointment.can_leave_feedback %}
+                            <div class="feedback-container" id="feedback-{{ appointment.AppointmentID }}">
+                                <form onsubmit="leaveFeedback(event, '{{ appointment.AppointmentID }}')" id="leave-feedback-form-{{ appointment.AppointmentID }}" style="display:inline;">
+                                    <input type="text" name="feedback" placeholder="Enter feedback" required>
+                                    <button type="submit" class="btn-feedback">Leave Feedback</button>
+                                </form>
+                                <p id="feedback-msg-{{ appointment.AppointmentID }}" style="display: none; font-weight: bold;"></p>
+                            </div>
+                          {% else %}
+                            <button type="button" class="btn-feedback" disabled>Leave Feedback (Unavailable)</button>
+                          {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="no-appointments">
+            <div class="icon">📅</div>
+            <p>You have no past appointments yet.</p>
+            <a href="{{ url_for('book_appointment') }}" class="btn">Book an Appointment</a>
+        </div>
+    {% endif %}
+</div>
+
+<a href="{{ url_for('home') }}" class="back-home">Back to Home</a>
+
+<script>
+    function filterAppointments() {
+        var filterValue = document.getElementById('filter').value.toLowerCase();
+        var rows = document.querySelectorAll('.appointment-row');
+        rows.forEach(function(row) {
+            var status = row.getAttribute('data-status');
+            row.style.display = (filterValue === 'all' || status === filterValue) ? '' : 'none';
+        });
+    }
+
+    function searchAppointments() {
+        var searchValue = document.getElementById('search').value.toLowerCase();
+        var rows = document.querySelectorAll('.appointment-row');
+        rows.forEach(function(row) {
+            var appointmentId = row.getAttribute('data-appointment-id').toLowerCase();
+            var appointmentDate = row.getAttribute('data-appointment-date').toLowerCase();
+            var therapistId = row.getAttribute('data-therapist-id').toLowerCase();
+            var therapistName = row.getAttribute('data-therapist-name').toLowerCase();
+            row.style.display = (appointmentId.includes(searchValue) || appointmentDate.includes(searchValue) ||
+                                   therapistId.includes(searchValue) || therapistName.includes(searchValue)) ? '' : 'none';
+        });
+    }
+
+    // Show the edit form for feedback
+    function showEditFeedback(appointmentId) {
+        var editForm = document.getElementById('edit-form-' + appointmentId);
+        if (editForm.style.display === "none" || editForm.style.display === "") {
+            editForm.style.display = "block";
+        } else {
+            editForm.style.display = "none";
+        }
+    }
+
+    // Update feedback via AJAX
+    function updateFeedback(appointmentId) {
+        var feedbackInput = document.getElementById('feedback-input-' + appointmentId);
+        var feedbackText = feedbackInput.value;
+        var formData = new FormData();
+        formData.append('appointment_id', appointmentId);
+        formData.append('comments', feedbackText);
+
+        fetch("/update_feedback", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            var msgEl = document.getElementById('feedback-msg-' + appointmentId);
+            if (data.success) {
+                msgEl.style.color = "green";
+                msgEl.textContent = data.message;
+                msgEl.style.display = "block";
+                // Update the displayed feedback text
+                var feedbackContainer = document.getElementById('feedback-' + appointmentId);
+                feedbackContainer.querySelector('.feedback-text').textContent = feedbackText;
+                // Hide the edit form after successful update
+                document.getElementById('edit-form-' + appointmentId).style.display = "none";
+            } else {
+                msgEl.style.color = "red";
+                msgEl.textContent = data.error || "Error updating feedback.";
+                msgEl.style.display = "block";
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            var msgEl = document.getElementById('feedback-msg-' + appointmentId);
+            msgEl.style.color = "red";
+            msgEl.textContent = "Error updating feedback.";
+            msgEl.style.display = "block";
+        });
+    }
+
+// Delete feedback via AJAX with a custom confirmation dialog
+function deleteFeedback(appointmentId) {
+    Swal.fire({
+        title: 'Confirm Delete',
+        text: "Are you sure you want to delete your feedback?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c', // red for delete
+        cancelButtonColor: '#aaa',
+        confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var formData = new FormData();
+            formData.append('appointment_id', appointmentId);
+
+            fetch("/delete_feedback", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                var msgEl = document.getElementById('feedback-msg-' + appointmentId);
+                if (data.success) {
+                    msgEl.style.color = "red";
+                    msgEl.textContent = data.message;
+                    msgEl.style.display = "block";
+                    // Remove the existing feedback and show the leave feedback form if allowed
+                    var container = document.getElementById('feedback-' + appointmentId);
+                    container.innerHTML = `
+                        <form onsubmit="leaveFeedback(event, '${appointmentId}')" id="leave-feedback-form-${appointmentId}" style="display:inline;">
+                            <input type="text" name="feedback" placeholder="Enter feedback" required>
+                            <button type="submit" class="btn-feedback">Leave Feedback</button>
+                        </form>
+                        <p id="feedback-msg-${appointmentId}" style="display: none; font-weight: bold;"></p>
+                    `;
+                } else {
+                    msgEl.style.color = "red";
+                    msgEl.textContent = data.error || "Error deleting feedback.";
+                    msgEl.style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                var msgEl = document.getElementById('feedback-msg-' + appointmentId);
+                msgEl.style.color = "red";
+                msgEl.textContent = "Error deleting feedback.";
+                msgEl.style.display = "block";
+            });
+        }
+    });
+}
+
+    // For leaving new feedback (when no feedback exists yet)
+    function leaveFeedback(event, appointmentId) {
+        event.preventDefault();
+        var form = document.getElementById('leave-feedback-form-' + appointmentId);
+        var formData = new FormData(form);
+        var msgEl = document.getElementById('feedback-msg-' + appointmentId);
+        formData.append('appointment_id', appointmentId);
+        formData.append('comments', formData.get('feedback'));
+
+        fetch("/update_feedback", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                msgEl.style.color = "green";
+                msgEl.textContent = data.message;
+                msgEl.style.display = "block";
+                var container = document.getElementById('feedback-' + appointmentId);
+                container.innerHTML = `
+                    <p class="feedback-text">${formData.get('feedback')}</p>
+                    <button class="btn-feedback" onclick="showEditFeedback('${appointmentId}')">Edit Feedback</button>
+                    <button class="btn-delete" onclick="deleteFeedback('${appointmentId}')">Delete Feedback</button>
+                    <div class="edit-feedback-form" id="edit-form-${appointmentId}" style="display: none;">
+                        <textarea id="feedback-input-${appointmentId}" rows="3">${formData.get('feedback')}</textarea>
+                        <button type="button" class="btn-feedback" onclick="updateFeedback('${appointmentId}')">Save</button>
+                        <p id="feedback-msg-${appointmentId}" style="display: none; font-weight: bold;"></p>
+                    </div>
+                `;
+            } else {
+                msgEl.style.color = "red";
+                msgEl.textContent = data.error || "Error leaving feedback.";
+                msgEl.style.display = "block";
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            msgEl.style.color = "red";
+            msgEl.textContent = "Error leaving feedback.";
+            msgEl.style.display = "block";
+        });
+    }
+</script>
+
+</body>
+</html>

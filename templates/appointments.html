@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Appointments</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: #333;
+        }
+
+        h1 {
+            background-color: #6a0572;
+            color: white;
+            padding: 20px;
+            margin: 0;
+            text-align: center;
+        }
+
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #6a0572;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .no-appointments {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .back-home {
+            display: block;
+            width: 200px;
+            text-align: center;
+            background-color: #6a0572;
+            color: white;
+            padding: 10px;
+            margin: 30px auto;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .back-home:hover {
+            background-color: #a71d8e;
+        }
+
+        .btn-cancel {
+            color: white;
+            background-color: #f44336;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .btn-cancel:hover {
+            background-color: #e53935;
+        }
+
+        .btn-feedback {
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .btn-feedback:hover {
+            background-color: #45a049;
+        }
+
+        .btn-feedback:disabled {
+            background-color: #9e9e9e;
+            cursor: not-allowed;
+        }
+
+        .feedback-message {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 20px;
+            color: #4CAF50;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                width: 95%;
+            }
+
+            th, td {
+                font-size: 14px;
+            }
+        }
+
+        .flash-messages {
+    width: 80%;
+    margin: 20px auto;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.flash-message {
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #ffcc00;
+    color: #333;
+    border-radius: 3px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.flash-message.success {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.flash-message.error {
+    background-color: #f44336;
+    color: white;
+}
+
+.flash-message.info {
+    background-color: #2196F3;
+    color: white;
+}
+
+.flash-message.warning {
+    background-color: #ff9800;
+    color: white;
+}
+
+    </style>
+</head>
+<body>
+
+<h1>Your Appointments</h1>
+
+<!-- Displaying flash messages for feedback -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul>
+            {% for category, message in messages %}
+                <li class="feedback-message">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+<!-- Appointments Table -->
+{% if appointments %}
+    <table>
+        <thead>
+            <tr>
+                <th>Appointment ID</th>
+                <th>Therapist Name</th>
+                <th>Appointment Date</th>
+                <th>Time</th>
+                <th>Payment Method</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+                <tr>
+                    <td>{{ appointment.AppointmentID }}</td>
+                    <td>{{ appointment.TherapistName }}</td>
+                    <td>{{ appointment.Date }}</td>
+                    <td>{{ appointment.Time }}</td>
+                    <td>{{ appointment.PaymentMethod }}</td>
+                    <td>{{ appointment.Amount }}</td>
+                    <td>{{ appointment.Status }}</td>
+                    <td>
+                        <!-- Cancel button -->
+                        <form action="{{ url_for('cancel_appointment', appointment_id=appointment.AppointmentID) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn-cancel">Cancel</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p class="no-appointments">You don't have any appointments yet.</p>
+{% endif %}
+
+<!-- Back to Home link -->
+<a href="{{ url_for('home') }}" class="back-home">Back to Home</a>
+
+</body>
+</html>

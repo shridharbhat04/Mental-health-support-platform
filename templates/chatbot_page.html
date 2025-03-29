@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot - Mental Health Support</title>
+    <style>
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            font-family: Arial, sans-serif;
+            z-index: 1000;
+        }
+
+        #chat-window {
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+            overflow: hidden;
+        }
+
+        #chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+        }
+
+        #chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        #chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        #chat-input button {
+            padding: 10px;
+            background-color: #6a0572;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        #chat-input button:hover {
+            background-color: #a71d8e;
+        }
+
+        /* General Styles for Page */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #ff9a9e, #fad0c4);
+            color: #333;
+            text-align: center;
+        }
+
+        h1 {
+            background-color: #6a0572;
+            color: white;
+            padding: 20px;
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        h2 {
+            color: #6a0572;
+            font-size: 1.8rem;
+            margin: 20px 0;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        a {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #6a0572;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        a:hover {
+            background-color: #a71d8e;
+            transform: scale(1.05);
+        }
+
+        /* Button style for navigating to chatbot */
+        .chatbot-button button {
+            background-color: #6a0572;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .chatbot-button button:hover {
+            background-color: #a71d8e;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; padding-top: 20px;">Chatbot - Mental Health Support</h1>
+
+    <div class="container">
+        <p style="text-align: center;">Welcome to the chatbot page. Feel free to ask your questions and get assistance with mental health resources.</p>
+
+        <!-- Chatbot Container -->
+        <div class="chatbot-container">
+            <div id="chat-window">
+                <div id="chat-messages">
+                    <!-- Messages will appear here -->
+                </div>
+
+                <div id="chat-input">
+                    <input type="text" id="user-input" placeholder="Type your message..." />
+                    <button onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for chatbot interaction -->
+    <script>
+        async function sendMessage() {
+            const userInput = document.getElementById("user-input").value;
+            if (!userInput) return;  // Don't send empty input
+
+            // Display the user's message
+            const chatMessages = document.getElementById("chat-messages");
+            chatMessages.innerHTML += `<div class="message user"><strong>You:</strong> ${userInput}</div>`;
+
+            // Send the user input to the Flask backend
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userInput })
+            });
+
+            const data = await response.json();
+
+            // Display the bot's formatted response
+            chatMessages.innerHTML += `<div class="message bot"><strong>Bot:</strong><br>${data.response.replace(/\n/g, "<br>")}</div>`;
+
+            // Clear the input field and scroll to the bottom
+            document.getElementById("user-input").value = "";
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Listen for "Enter" key press in the input field
+        document.getElementById("user-input").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();  // Prevents a newline in the input field
+                sendMessage();  // Trigger the sendMessage function
+            }
+        });
+    </script>
+</body>
+</html>

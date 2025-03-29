@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat History</title>
+</head>
+<body>
+    <h2>Chat History</h2>
+    <table>
+        <tr>
+            <th>Sender</th>
+            <th>Message</th>
+            <th>Timestamp</th>
+        </tr>
+        {% for message in messages %}
+        <tr>
+            <td>{{ message[1] }}</td>
+            <td>{{ message[3] }}</td>
+            <td>{{ message[4] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        /* Import Google Font */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        /* General body styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, #8e44ad, #c0392b);
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Header styling */
+        h1 {
+            text-align: center;
+            color: #fff;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 2.5rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Dashboard container */
+        .dashboard-container {
+            max-width: 900px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        /* Statistics section */
+        .dashboard-container p {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        .dashboard-container p strong {
+            color: #ffcc00;
+            font-weight: 600;
+        }
+
+        /* Section styling */
+        .section {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .section h2 {
+            font-size: 1.6rem;
+            color: #ffcc00;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .section a {
+            display: inline-block;
+            margin: 10px auto;
+            padding: 14px 24px;
+            font-size: 1rem;
+            text-decoration: none;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .section a:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            border-color: #ffcc00;
+        }
+
+        /* Logout section */
+        .logout {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .logout a {
+            text-decoration: none;
+            color: #ffcc00;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+
+        .logout a:hover {
+            color: #ff5733;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <h1>Welcome, Admin</h1>
+
+    <!-- Dashboard container -->
+    <div class="dashboard-container">
+        <!-- Dashboard Statistics -->
+        <p>Users: <strong>{{ user_count }}</strong></p>
+        <p>Therapists: <strong>{{ therapist_count }}</strong></p>
+        <p>Appointments: <strong>{{ appointment_count }}</strong></p>
+
+        <!-- Manage Users Section -->
+        <div class="section">
+            <h2>Manage Users</h2>
+            <a href="{{ url_for('manage_users') }}">View/Delete Users</a>
+        </div>
+
+        <!-- Manage Therapists Section -->
+        <div class="section">
+            <h2>Manage Therapists</h2>
+            <a href="{{ url_for('manage_therapist') }}">Verify Therapists</a>
+        </div>
+
+        <!-- Manage Appointments Section -->
+        <div class="section">
+            <h2>Manage Appointments</h2>
+            <a href="{{ url_for('manage_admin_appointments') }}">View/Delete Appointments</a>
+        </div>
+
+        <!-- Logout -->
+        <div class="logout">
+            <a href="{{ url_for('admin_logout') }}">Logout</a>
+        </div>
+    </div>
+
+</body>
+</html>

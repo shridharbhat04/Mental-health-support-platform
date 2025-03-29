@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <style>
+        /* General styling for the page */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #6a0572, #a71d8e);
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Centered login container */
+        .login-container {
+            background: white;
+            padding: 30px 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            text-align: center;
+        }
+
+        /* Heading */
+        h2 {
+            margin-bottom: 20px;
+            font-size: 2rem;
+            color: #6a0572;
+        }
+
+        /* Flash messages */
+        .error, .success {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .error {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* Form elements */
+        label {
+            font-weight: bold;
+            color: #6a0572;
+            display: block;
+            text-align: left;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #6a0572;
+            outline: none;
+            box-shadow: 0 0 5px rgba(106, 5, 114, 0.3);
+        }
+
+        /* Submit button */
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #6a0572;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #8e3a9e;
+            transform: translateY(-2px);
+        }
+
+        /* Back to home link */
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            text-decoration: none;
+            color: #6a0572;
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #8e3a9e;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Admin Login</h2>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Login Form -->
+        <form id="loginForm" method="POST" novalidate>
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+            <p id="loginMessage" style="display:none;"></p>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <a href="/">Back to Home</a>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(this);
+            const loginMessage = document.getElementById("loginMessage");
+
+            fetch("/admin/login", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    loginMessage.style.color = "green";
+                    loginMessage.textContent = "Login Successful! Redirecting...";
+                    loginMessage.style.display = "block";
+
+                    setTimeout(() => {
+                        window.location.href = "/admin/dashboard";
+                    }, 1500);
+                } else {
+                    loginMessage.style.color = "red";
+                    loginMessage.textContent = data.error || "Invalid credentials.";
+                    loginMessage.style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                loginMessage.style.color = "red";
+                loginMessage.textContent = "Something went wrong. Please try again.";
+                loginMessage.style.display = "block";
+            });
+        });
+    </script>
+</body>
+</html>
